@@ -3,7 +3,7 @@ const express = require("express");
 const path = require("path");
 const postroute = require("../routes/routes");
 const queryFuncs = require("../db/queryFunc");
-const sqlite3 = require("sqlite3");
+// const sqlite3 = require("sqlite3");
 
 
 //creating a server
@@ -27,7 +27,7 @@ app.listen(port, ()=>{
 
 
 
-const t_name = "login_detail";
+const t_name = "user_profile";
 // queryFuncs.createTable_login();
 // queryFuncs.deleteTable(t_name);
 // // queryFuncs.createTable_login();
