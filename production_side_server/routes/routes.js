@@ -10,15 +10,13 @@ const router = express.Router();
 //get req for sending salt and no of iteration.
 router.get("/salt/:username" ,async (req,res)=>{
 
+    //function to filter out login_hash of that username and return a object having hash_value;
     var data =  await queryFuncs.user_detail_data(req, res);
     const hash_string = data[0].login_hash;
-
-    //function to filter out login_hash of that username and return a object having hash_value;
+    
+    //function to seprate out salt and no of it from hash and return a object named obj which contain salt and no of it.
     const obj = await systemFuncs.salt_it(hash_string);
-
-    //function to seprate out salt and no of it from hash and return a object named obj.
-    // console.log(hash_val);
-    // res.status(200).json(obj);
+    res.status(200).json(obj);
 });
 
 
@@ -28,13 +26,22 @@ router.use(express.json());
 
 
 // post req when user creates a new acc.
-router.post("/create/account",(req,res)=>{
+router.post("/create/account",async(req,res)=>{
     // var {data} = req.body;
     //fun to hash the hashed value again;
+
+    
     // fun to store data.
-    // queryFuncs.createTable_user_profile();
-    queryFuncs.insert_into_user_detail(req,res);
+    var data = await queryFuncs.insert_into_user_detail(req,res);
+    let u_name = data.username;
+    console.log(`${u_name} your account is created.`);
+    let mssg = await queryFuncs.createTable_login(u_name);
+    console.log(mssg);
+    
 });
+
+// queryFuncs.createTable_user_profile()
+
 
 
 
@@ -43,7 +50,6 @@ router.post("/savepassword/:username",(req,res)=>{
     const u_name = req.params.username;
 
     //fun to store data
-    // queryFuncs.createTable_login(u_name);
     queryFuncs.insert_into_login(u_name, req , res);
 });
 
