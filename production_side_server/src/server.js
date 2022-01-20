@@ -27,7 +27,9 @@ app.listen(port, ()=>{
 
 
 
-const t_name = "user_profile";
+// const t_name = "user_profile";
+const t_name = "lakshA_detail";
+
 // queryFuncs.createTable_login();
 // queryFuncs.deleteTable(t_name);
 // // queryFuncs.createTable_login();
