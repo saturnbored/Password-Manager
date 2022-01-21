@@ -15,9 +15,9 @@ const db = new sqlite3.Database(db_path, (err) => {
 });
 
 //Creates Table which contails all users Login cendentials
-function createTable_user_profile() {
-  new Promise((resolve , reject)=>{
-    db.run(
+async function createTable_user_profile() {
+  new Promise(async (resolve , reject)=>{
+    await db.run(
       "CREATE TABLE user_profile(\
               u_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
               username NVARCHAR(20) NOT NULL UNIQUE,\
@@ -43,6 +43,7 @@ function createTable_login(u_name) {
     db.run(
       `CREATE TABLE ${u_name}_detail (\
               id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
+              name NVARCHAR(20) NOT NULL,\
               username NVARCHAR(20) NOT NULL,\
               password NVARCHAR(300) NOT NULL,\
               url NVACHAR(100) NOT NULL ,\
@@ -64,8 +65,8 @@ function createTable_login(u_name) {
 
 
 //insert data when new user creates account
-function insert_into_user_detail(req, res) {
-  let reqData = req.body;
+function insert_into_user_detail(reqData) {
+  // let reqData = req.body;
   return new Promise((resolve, reject)=>{
       db.run(
         `INSERT INTO user_profile (username , email, mobileNo, login_hash) 
@@ -76,7 +77,7 @@ function insert_into_user_detail(req, res) {
             reject(err.message);
             return;
           }
-          resolve(reqData);
+          resolve(true);
         }
       );    
   })
@@ -110,10 +111,7 @@ async function login_detail_data(u_name, res) {
 
 
 
-function user_detail_data(req, res) {
-  let u_name = req.params.username;
-  let hash_val = "ajdaei";
-
+function user_detail_data(u_name) {
   return new Promise((resolve, reject) => {
     db.all(
       `SELECT * FROM user_profile WHERE username = ?`,
@@ -125,12 +123,20 @@ function user_detail_data(req, res) {
         resolve(data);
       }
     );
-    //  console.log("called sencond");
   });
 }
 
 
 
+
+//delete rows from userDetail table.
+// How can we get name of table?
+// function deleteRow_from_user_detail(req, res){
+//   let name = req.params.name;
+//   return new Promise((resolve , reject)=>{
+//     db.run(`DELETE FROM `)
+//   })
+// }
 
 
 async function deleteTable(t_name) {
