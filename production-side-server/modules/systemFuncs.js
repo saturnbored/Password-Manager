@@ -35,9 +35,10 @@ function hashAgain(data){
             const server_it = 100000;
             const keyLen = 32;
             let [client_it, client_salt, hashString]= await data.login_hash.split('$');
+            const hashStringBuffer = Buffer.from(hashString, 'hex');
             const saltBuffer = await generateRandomBytes(keyLen);
             const server_salt = saltBuffer.toString('hex');
-            let newHash = await generateHash(hashString , server_salt , server_it , keyLen );
+            let newHash = await generateHash(hashStringBuffer , server_salt , server_it , keyLen );
             data.login_hash=`${client_it}$${client_salt}$${newHash}`;
             resolve(data);
         } 
