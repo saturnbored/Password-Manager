@@ -34,11 +34,11 @@ function hashAgain(data){
         try {
             const server_it = 100000;
             const keyLen = 32;
-            let [client_it, client_salt, hashString]= await data.login_hash.split('$');
+            let [client_it, client_salt, hashString]= await data.split('$');
             const saltBuffer = await generateRandomBytes(keyLen);
             const server_salt = saltBuffer.toString('hex');
             let newHash = await generateHash(hashString , server_salt , server_it , keyLen );
-            data.login_hash=`${client_it}$${client_salt}$${newHash}`;
+            data=`${client_it}$${client_salt}$${newHash}`;
             resolve(data);
         } 
         catch (error) {
@@ -59,4 +59,5 @@ async function verifyPassword(obj){
 }
 
 
-module.exports = {salt_it};
+
+module.exports = {salt_it, hashAgain , verifyPassword};
