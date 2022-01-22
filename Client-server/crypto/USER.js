@@ -9,7 +9,7 @@ class USER{
     #keyLen = 32; // bytes of encryption key
     #keyIterations = 1e4; // iterations for generating encryption key
 
-    constructor(username, password){
+    setDetails(username, password){
         this.#password = Buffer.from(password, 'utf-8');
         this.#username = username;
     }
