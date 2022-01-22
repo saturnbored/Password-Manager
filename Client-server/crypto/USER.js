@@ -5,20 +5,22 @@ const { encrypt, decrypt } = require('./Encryption');
 class USER{
     #key; // encryption key
     #password;  // this stores the Buffer of the Master Password
-    #username; // username of the user
     #keyLen = 32; // bytes of encryption key
     #keyIterations = 1e4; // iterations for generating encryption key
+    
+    username; // username of the user
+    vault = [];
 
     setDetails(username, password){
         this.#password = Buffer.from(password, 'utf-8');
-        this.#username = username;
+        this.username = username;
     }
 
     // #generateKey will set the encryption key in this.#key
     async #generateKey(hash){
         try{
             const hashBuffer = Buffer.from(hash.split('$')[2], 'hex');
-            this.#key = await generateHash(hashBuffer, this.#username, this.#keyIterations, this.#keyLen);
+            this.#key = await generateHash(hashBuffer, this.username, this.#keyIterations, this.#keyLen);
             this.#key = this.#key.split('$')[2];
         }
         catch(err){
