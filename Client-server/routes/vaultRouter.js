@@ -4,7 +4,7 @@ const {addItem, getItem, updateItem, deleteItem, getDecryptedVault, getEncrypted
 
 router.route('/item').post(addItem);
 
-router.route('/item/:id').get(getItem).patch(updateItem).delete(deleteItem);
+router.route('/item/:name').get(getItem).patch(updateItem).delete(deleteItem);
 
 router.route('/all/decrypted').get(getDecryptedVault)
 
