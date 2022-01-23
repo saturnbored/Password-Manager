@@ -22,12 +22,13 @@ class USER{
             const hashBuffer = Buffer.from(hash.split('$')[2], 'hex');
             this.#key = await generateHash(hashBuffer, this.username, this.#keyIterations, this.#keyLen);
             this.#key = this.#key.split('$')[2];
+            console.log(this.#key);
         }
         catch(err){
             console.log(err);
         }
     }
-
+    
     // this will generate the hash of this.#password and call this.#generateKey()
     getPassswordHash(salt, iterations){
         const that = this;
@@ -59,7 +60,7 @@ class USER{
             }
         })    
     }
-
+    
     // function to encrypt text using this.#key
     getEncrypted(text){
         const that = this;
@@ -77,7 +78,7 @@ class USER{
             }
         })
     }
-
+    
     //function to decrypt ciphertext using this.#key
     getDecrypted(encrypted){
         const that = this;
@@ -94,21 +95,22 @@ class USER{
             }
         })
     }
+    
+    setVault(){
+        this.vault.forEach(async function(obj){
+            try{
+                obj.name = await this.getDecrypted(obj.name);
+            }
+            catch(err){
+                console.log(err);
+            }
+        })
+    }
 }
-/* 
-const user = new USER('username', 'password');
-user.getPassswordHash()
-.then(function(res){
-    console.log(res);
-    return user.getEncrypted('decrypted')
-})
-.then(function(res){
-    console.log(res);
-    return user.getDecrypted(res);
-})
-.then(res => console.log(res))
-.catch(err => console.log(err));
- */
+
+const user = new USER;
+
 module.exports = {
-    USER
+    USER,
+    user
 }

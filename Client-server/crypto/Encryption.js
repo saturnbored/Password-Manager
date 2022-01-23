@@ -24,7 +24,7 @@ const decrypt = function(cipherText, key){
     return new Promise(function(resolve, reject){
         const [IV, encrypted] = cipherText.split('$');
         if(!IV || !encrypted){
-            reject({msg: "cipherText is invalid"});
+            return resolve(cipherText); // gives an error without the return keyword: why?
         }
         const keyBuffer = Buffer.from(key, 'hex');
         const IVBuffer = Buffer.from(IV, 'hex');
@@ -40,26 +40,6 @@ const decrypt = function(cipherText, key){
         }
     })
 }
-
-/* const plainText = 'this is the un-encrypted text';
-
-const check = async function(text){
-    try{
-        const keyBuffer = await generateRandomBytes(32);
-        const key = keyBuffer.toString('hex');
-        const cipherText = await encrypt(text, key);
-        const decrypted = await decrypt(cipherText, key);
-        if(decrypted === text)
-            console.log('Matched');
-        else 
-            console.log('Did not match');
-    }
-    catch(err){
-        console.log(err);
-    }
-}
-
-check(plainText); */
 
 module.exports = {
     encrypt,
