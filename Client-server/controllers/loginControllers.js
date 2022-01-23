@@ -4,11 +4,14 @@
 
 const axios = require('axios').create({baseUrl: "http://localhost:8080/"});
 
-const { USER } = require('../crypto/USER');
-
-const user = new USER;
-
-console.log(user);
+const { user, USER } = require('../crypto/USER');
+/**
+ * user object:
+ * vault: array of JSON objects
+ * getPasswordHash() // returns hash of the master password
+ * getEncrypted(text: string/utf-8) // returns encrypted text
+ * getDecrypted(encrypted: string/hex) // returns decrypted text
+ */
 
 /** 
  * req.body object: {
@@ -42,6 +45,12 @@ const addNewUser = async function(req, res){
     }
 }
 
+/** 
+ * req.body object: {
+ *  username: string/utf-8,
+ *  password: string/utf-8,
+ * }
+ */
 const loginUser = async function(req, res){
     user.setDetails(req.body.username, req.body.password);
     try{
@@ -50,13 +59,18 @@ const loginUser = async function(req, res){
                 username: req.body.username
             }
         });
+        // const saltBuffer = await generateRandomBytes(32);
+        // const salt = saltBuffer.toString('hex');
+        // const iterations = 100000;
         const passswordHash = await user.getPassswordHash(salt, iterations);
         const result = await axios.post('login/', { loginHash: passswordHash });
+        // const result = { success: true };
         if(result.success){
             user.vault = await axios.get('vault/', {
                 params: { username: req.body.username }
             });
-            return res.status(200).json(result.message);
+            user.setVault();
+            return res.status(200).json(user);
         }
         else{
             throw new Error("Internal server error");
@@ -71,5 +85,4 @@ const loginUser = async function(req, res){
 module.exports = {
     addNewUser,
     loginUser,
-    user
 }

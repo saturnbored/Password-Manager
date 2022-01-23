@@ -2,17 +2,15 @@
  * this file contains all the controllers for '../routes/vaultRouter.js'
  * 
 */
+const axios = require('axios').create({ baseUrl: "http://localhost:8080/" });
 
-const {encrypt, decrypt} = require('../crypto/Encryption');
-/** 
- * encrypt(text: string/utf-8, key: string/hex)
- * encrypt returns a Promise of string(hex)
- * 
- * decrypt(cipherText: string/hex, key: string/hex)
- * decrypt returns a Promise of string(utf-8)
-*/
-
-const {generateRandomBytes} = require('../utils/randomBytes');
+const {user} = require('../crypto/USER');
+/**
+ * user object:
+ * vault: array of JSON objects
+ * getEncrypted(text: string/utf-8) // returns encrypted text
+ * getDecrypted(encrypted: string/hex) // returns decrypted text
+ */
 
 /** 
  * addItem:(to add an item to login_details table in database)
@@ -30,26 +28,22 @@ const {generateRandomBytes} = require('../utils/randomBytes');
 const addItem = async function(req, res){
 
     try {
-        
-        // temporarily using a randomKey for testing
-        const keyBuffer = await generateRandomBytes(32);
-        const key = keyBuffer.toString('hex');
-        
-        let encryptedDetails = req.body;
-        
-        if(!encryptedDetails.name){
-            return res.status(400).json({
-                msg: "Name is a required field"
-            });
+        const encryptedDetails = req.body;
+        encryptedDetails.username = await user.getEncrypted(req.body.username);
+        encryptedDetails.password = await user.getEncrypted(encryptedDetails.password);
+        encryptedDetails.url = await user.getEncrypted(encryptedDetails.url);
+        encryptedDetails.description = await user.getEncrypted(encryptedDetails.description);
+        const result = await axios.post('savepassword/', encryptedDetails, {
+            params: { username: user.username }
+        })
+        // const result = {success: true};
+        if(result.success){
+            user.vault.push(req.body);
+            return res.status(201).json({ success: true, addedInfo: encryptedDetails });
         }
-        
-        encryptedDetails.name = await encrypt(encryptedDetails.name, key);
-        encryptedDetails.username = await encrypt(encryptedDetails.username, key);
-        encryptedDetails.password = await encrypt(encryptedDetails.password, key);
-        encryptedDetails.url = await encrypt(encryptedDetails.url, key);
-        encryptedDetails.description = await encrypt(encryptedDetails.description, key);
-        
-        return res.status(201).json(encryptedDetails);
+        else{
+            throw new Error("Internal server error");
+        }
 
     } catch (err) {
         console.log(err);
@@ -63,60 +57,139 @@ const addItem = async function(req, res){
  * getItem: (to get a particular login_detail which will be specified by the name)
  * req will contain the params: name
  */
-const getItem = function(req, res){
-    console.log(req);
-}
-
-const updateItem = async function(req, res){
-    try {
-        
-        // temporarily using a randomKey for testing
-        const keyBuffer = await generateRandomBytes(32);
-        const key = keyBuffer.toString('hex');
-        
-        let encryptedDetails = req.body;
-        
-        if(!encryptedDetails.name){
-            return res.status(400).json({
-                msg: "Name is a required field"
-            });
-        }
-        if(encryptedDetails.name)
-            encryptedDetails.name = await encrypt(encryptedDetails.name, key);
-        
-        if(encryptedDetails.username)
-            encryptedDetails.username = await encrypt(encryptedDetails.username, key);
-    
-        if(encryptedDetails.password)
-            encryptedDetails.password = await encrypt(encryptedDetails.password, key);
-
-        if(encryptedDetails.url)
-            encryptedDetails.url = await encrypt(encryptedDetails.url, key);
-        
-        if(encryptedDetails.description)
-            encryptedDetails.description= await encrypt(encryptedDetails.description, key);
-        
-        return res.status(200).json(encryptedDetails);
-
-
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({
-            msg: "An unexpected error occurred"
+const getItem = async function(req, res){
+    try{
+        let [item] = user.vault.filter(function(obj){
+            return obj.name === req.params.name;
         });
+        // console.log(item);
+        if(!item){
+            return res.status(404).json({ msg: "No resource found" });
+        }
+        for(const field in item){
+            if(field === 'id' || field == 'name') continue;
+            item[field] = await user.getDecrypted(item[field]);
+        }
+        return res.status(200).json({ success: true, data: item });
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({ success: false, err });
     }
 }
 
-const deleteItem = function(req, res){
-    console.log(req);
+/** 
+ * updateItem: (to update a particular login_detail which will be specified by the name)
+ * req will contain the params: name
+ * re.body may contain:
+ * name: <the name under which the user will be storing this info
+ * username: <username>
+ * password: <password for the username>
+ * url: <url for which the user has provided the above username and passwords>
+ * description: <additional descriptions that the user would add as a note>
+ */
+const updateItem = async function(req, res){
+    try {
+        let updatedItem = req.body;
+        let [item] = user.vault.filter(function(obj){
+            return obj.name === req.params.name;
+        });
+        // console.log(item);
+        if(!item){
+            return res.status(404).json({ msg: "No resource found" });
+        }
+        for(const field in item){
+            item[field] = await user.getDecrypted(item[field]);
+        }
+        for(const field in updatedItem){
+            if(item[field] !== updatedItem[field]){
+                item[field] = updatedItem[field];
+            }
+        }
+        for(let obj in user.vault){
+            if(obj.name === req.params.name){
+                obj = item;
+                break;
+            }
+        }
+        const result = await axios.patch('data/', item, {
+            params: {
+                username: user.username,
+                id: item.id
+            }
+        });
+        if(result.sucess){
+            return res.status(200).json({item});
+        }
+        else{
+            throw new Error("Internal Server Error");
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ err });
+    }
 }
 
-const getDecryptedVault = function(req, res){
-    console.log(req);
+/** 
+ * deleteItem: (to delete a particular login_detail which will be specified by the name)
+ * req will contain the params: name
+ */
+const deleteItem = async function(req, res){
+    try{
+        let [item] = user.vault.filter(function(obj){
+            return obj.name === req.params.name;
+        });
+        // console.log(item);
+        if(!item){
+            return res.status(404).json({ msg: "No resource found" });
+        }
+        const result = await axios.delete('data/',{
+            params: {
+                username: user.username,
+                id: item.id
+            }
+        })
+        if(result.success){
+            user.vault.splice(user.vault.findIndex(obj => obj.id === item.id), 1);
+            return res.status(200).json({success: true, msg: "Deleted successfully"})
+        }
+        else{
+            throw new Error("Internal Server Error");
+        }
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({err});
+    }  
 }
 
-const getEncryptedVault = function(req, res){
-    console.log(req);
+// GET the entire decrypted vault
+const getDecryptedVault = async function(req, res){
+    try {
+        for(const obj in user.vault){
+            for(const field in obj){
+                obj[field] = await user.vault.getDecrypted(obj[field]);
+            }
+        };
+        return res.status(200).json({vault: user.vault});
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ err });
+    }
+}
+
+// GET the entire encrypted vault 
+const getEncryptedVault = async function(req, res){
+    try {
+        const encryptedVault = await axios.get('vault/', { 
+            params: {username: user.username}
+        })
+        return res.status(200).json(encryptedVault);
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({err});
+    }
 }
 
 module.exports = {
