@@ -31,80 +31,64 @@ const runQuery = function(queryStatement, options){ // options would contain an 
 
 //Creates Table which contails all users Login cendentials
 async function createTable_user_profile() {
-  new Promise(async (resolve , reject)=>{
-    await db.run(
-      "CREATE TABLE user_profile(\
-              u_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-              username NVARCHAR(20) NOT NULL UNIQUE,\
-              email NVARCHAR(319) NOT NULL UNIQUE,\
-              mobileNo NVARCHAR(10) NOT NULL UNIQUE,\
-              login_hash NVARCHAR(2000) NOT NULL\
-              )",
-      (err) => {
-        if (err) {
-          console.log({"Table already Exists.":err.message});
-        }
-      }
-    );
-    resolve("Table created");
-  })
+  try {
+    const sqlQuery = "CREATE TABLE user_profile(\
+      u_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
+      username NVARCHAR(20) NOT NULL UNIQUE,\
+      email NVARCHAR(319) NOT NULL UNIQUE,\
+      mobileNo NVARCHAR(10) NOT NULL UNIQUE,\
+      login_hash NVARCHAR(2000) NOT NULL\
+      )";
+    const result = await runQuery(sqlQuery);
+    return result;
+  } catch (error) {
+    return error;
+  }
 }
 
 
 
-//creates table for user which contain data of perticular user
-// function createLoginDetailTable(u_name) {
-//   return new Promise((resolve, reject)=>{
-//     db.run(
-//       `CREATE TABLE ${u_name}_detail (\
-//               id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-//               name NVARCHAR(20) NOT NULL,\
-//               username NVARCHAR(20) NOT NULL,\
-//               password NVARCHAR(300) NOT NULL,\
-//               url NVACHAR(100) NOT NULL ,\
-//               description NVARCHAR(300) NOT NULL,\
-//               u_id INTEGER NOT NULL,\
-//                   FOREIGN KEY (u_id) REFERENCES user_profile (u_id) \
-//               )`,
-//       (err) => {
-//         if (err) {
-//           reject("Table already Exists: " + err.message);
-//         }
-//         resolve(`Table ${u_name}detail is created.`);
-//       }
-      
-//     );
-//   })
-// }
+//creates table for users to store their login details.
+async function createLoginDetailTable() {
+  const sqlQuery = `CREATE TABLE login_detail (\
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
+    name NVARCHAR(20) NOT NULL,\
+    username NVARCHAR(20) NOT NULL,\
+    password NVARCHAR(300) NOT NULL,\
+    url NVACHAR(100) NOT NULL ,\
+    description NVARCHAR(300) NOT NULL,\
+    u_id INTEGER NOT NULL,\
+        FOREIGN KEY (u_id) REFERENCES user_profile (u_id) \
+    )`;
+try {
+  const data = await  runQuery(sqlQuery);
+  return true ;
+
+} catch (err) {
+  return err;
+}
+// console.log(data);
+}
+
 
 
 
 // insert data when new user creates account
-// function insert_into_user_detail(reqData) {
-//   // let reqData = req.body;
-//   return new Promise((resolve, reject)=>{
-//       db.run(
-//         `INSERT INTO user_profile (username , email, mobileNo, login_hash) 
-//          VALUES(?,?,?,?)`,
-//         [reqData.username, reqData.email, reqData.mobileNo, reqData.login_hash],
-//         (err, result) => {
-//           if (err) {
-//             reject(err.message);
-//             return;
-//           }
-//           resolve(true);
-//         }
-//       );    
-//   })
-// }
-
-const data2 ={
-  "name" : "amazon",
-  "username":"laksanfkanfkhA",
-    "password": "lg123@gfc-sfskakfmail_com",
-    "url": "http://www.amazon.com/login",
-  "description": "Login data testing ......."
+async function InsertIntoUserDetail(reqData) {
+  try {
+    const result =  await runQuery(
+      `INSERT INTO user_profile (username , email, mobileNo, login_hash) 
+       VALUES(?,?,?,?)`,
+      [reqData.username, reqData.email, reqData.mobileNo, reqData.login_hash],
+    ); 
+    return true; 
+  } catch (error) {
+    return error;
+  }  
 }
+
+
+
 //insert data of perticular user
 async function insertIntoLoginDetail(reqdata , userId){
   try {
@@ -112,99 +96,64 @@ async function insertIntoLoginDetail(reqdata , userId){
     return true;
   } catch (error) {
     return error;
-  }
-    
+  } 
 }
 
-// insertIntoLoginDetail(data2 , 2);
-
-
-
 //Select queries
-async function loginDetailData(uId) {
+async function userLoginData(uId) {
   try {
-    const sqlQuery = `SELECT name , username , password , url , description FROM login_detail WHERE u_id =?`;
+    const sqlQuery = `SELECT id ,name , username , password , url , description FROM login_detail WHERE u_id =?`;
     const result = await runQuery(sqlQuery , uId);
     return result;
   } catch (error) {
     return error;
   }
 }
-//  loginDetailData(32);
-
-
-
-
-// function user_detail_data(u_name) {
-//   return new Promise((resolve, reject) => {
-//     db.all(
-//       `SELECT * FROM user_profile WHERE username = ?`,
-//       u_name,
-//       (err, data) => {
-//         if (err) {
-//           reject({ error: err.message });
-//         }
-//         resolve(data);
-//       }
-//     );
-//   });
-// }
-
-
-  
-
-async function createLoginDetailTable() {
-    const sqlQuery = `CREATE TABLE login_detail (\
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-      name NVARCHAR(20) NOT NULL,\
-      username NVARCHAR(20) NOT NULL,\
-      password NVARCHAR(300) NOT NULL,\
-      url NVACHAR(100) NOT NULL ,\
-      description NVARCHAR(300) NOT NULL,\
-      u_id INTEGER NOT NULL,\
-          FOREIGN KEY (u_id) REFERENCES user_profile (u_id) \
-      )`;
+async function userIdFromLoginDetail(uId) {
   try {
-    const data = await  runQuery(sqlQuery);
-  } catch (err) {
-    
+    const sqlQuery = `SELECT u_id  FROM login_detail WHERE id =?`;
+    const result = await runQuery(sqlQuery , uId);
+    return result;
+  } catch (error) {
+    return error;
   }
-  console.log(data);
 }
 
 
-
-async function insert_into_user_detail(reqData) {
-   const result =  await runQuery(
-          `INSERT INTO user_profile (username , email, mobileNo, login_hash) 
-           VALUES(?,?,?,?)`,
-          [reqData.username, reqData.email, reqData.mobileNo, reqData.login_hash],
-        ); 
-        console.log(result);   
-  }
-
-  // insert_into_user_detail(data);
-
-
-async function user_detail_data(uName) {
+async function userDetailData(uName) {
   try {
     const data = await runQuery(`SELECT * FROM user_profile WHERE username = ?`,
         uName);
         return data;
-  } catch (error) {
-      console.log(error);
+  } catch (error){
+      return error;
   }
-  
 }
 
 
-
+//update query.
+//completed.
+async function updateUserData(id , data){
+  try {
+    const col = Object.keys(data);
+    const val = Object.values(data);
+    let s = `UPDATE login_detail SET`;
+    for (let i = 0; i < col.length; i++) {
+      s += ` ${col[i]} = "${val[i]}",`;
+    }
+    let sqlQuery = s.substring(0, s.length-1) + ` WHERE id = ?`; 
+    const result = await runQuery(sqlQuery , id);
+    return true;
+  } catch (error) {
+    return error;
+  }
+}
 //delete rows from userDetail table.
 // How can we get name of table?
 // function deleteRow_from_user_detail(req, res){
 //   let name = req.params.name;
 //   return new Promise((resolve , reject)=>{
-//     db.run(`DELETE FROM `)
+    // db.run(`DELETE FROM `)
 //   })
 // }
 
@@ -214,14 +163,14 @@ async function deleteTable(t_name) {
 }
 
 
-
-
 module.exports = {
   createTable_user_profile,
   createLoginDetailTable,
   deleteTable,
-  insert_into_user_detail,
+  InsertIntoUserDetail,
   insertIntoLoginDetail,
-  loginDetailData,
-  user_detail_data,
+  userLoginData,
+  userIdFromLoginDetail,
+  updateUserData,
+  userDetailData,
 };
