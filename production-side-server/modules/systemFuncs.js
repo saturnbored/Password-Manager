@@ -26,8 +26,9 @@ function hashAgain(data , salt ) {
       const server_it = 100000;
       const keyLen = 32;
       const [client_it, client_salt, hashString] = await data.split("$"); 
+      const hashStringBuff = Buffer.from(hashString , 'hex');
       const newHash = await generateHash(
-        hashString,
+        hashStringBuff,
         salt,
         server_it,
         keyLen
@@ -50,7 +51,8 @@ function hashAgain(data , salt ) {
             const data = await queryFuncs.userDetailData(username);
             const storedHash = data[0].login_hash;
             const salt = await storedHash.split("$")[3];
-            const newHash = await hashAgain(hashBeforeHashing,salt);
+            const hashBuff = Buffer.from(hashBeforeHashing , 'hex');
+            const newHash = await hashAgain(hashBuff,salt);
             if (newHash === storedHash) {
               resolve(true);
             } else {
