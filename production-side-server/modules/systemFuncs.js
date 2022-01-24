@@ -20,6 +20,7 @@ function saltAndIt(login_hash) {
   });
 }
 
+
 function hashAgain(data , salt ) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -40,8 +41,14 @@ function hashAgain(data , salt ) {
       reject(error);
     }
   });
-}
-// hashAgain(data);
+
+// const data = {
+//     "username":"lakshA",
+//     "email": "lg123@gmail.com",
+//     "mobileNo": 12124234355555289,
+//     "login_hash": "b4bFFBZDBSBFv16ZZDHb4zb4z6gdxh65tf465464ht5b4gf54x5x$g6z4g64s6g464r$z4hfdz464d646"
+// }
+
 
  function verifyPassword(obj) {
      return new Promise(async(resolve , reject)=>{

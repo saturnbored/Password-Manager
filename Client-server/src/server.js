@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 const vaultRouter = require('../routes/vaultRouter');
 
+const loginRouter = require('../routes/loginRouter');
+
 app.use(express.json()); // middleware to parse req body as JSON object
+
+app.use('/api/session', loginRouter);
 
 app.use('/api/vault',vaultRouter);
 
