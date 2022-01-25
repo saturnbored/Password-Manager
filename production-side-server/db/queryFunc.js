@@ -1,6 +1,5 @@
 const sqlite3 = require("sqlite3");
 const path = require("path");
-const systemFuncs = require("../modules/systemFuncs");
 const res = require("express/lib/response");
 const { resolve } = require("path");
 const { rejects } = require("assert");
@@ -148,18 +147,29 @@ async function updateUserData(id , data){
     return error;
   }
 }
-//delete rows from userDetail table.
+
+// delete rows from userDetail table.
 // How can we get name of table?
-// function deleteRow_from_user_detail(req, res){
-//   let name = req.params.name;
-//   return new Promise((resolve , reject)=>{
-    // db.run(`DELETE FROM `)
-//   })
-// }
+async function deleteRowInLoginDetail(id){
+  try {
+    const sqlQuery = `DELETE FROM login_detail WHERE id=?`;
+    const result = await runQuery(sqlQuery,id);
+    return true;
+  } catch (error) {
+    return error;
+  }
+}
+
+// deleteRowInLoginDetail(9);
 
 
 async function deleteTable(t_name) {
-  await db.run(`DROP TABLE ${t_name}`);
+  try {
+    const result = await db.run(`DROP TABLE ${t_name}`);
+    return true;
+  } catch (error) {
+    return error;
+  }
 }
 
 
@@ -173,4 +183,5 @@ module.exports = {
   userIdFromLoginDetail,
   updateUserData,
   userDetailData,
+  deleteRowInLoginDetail
 };
