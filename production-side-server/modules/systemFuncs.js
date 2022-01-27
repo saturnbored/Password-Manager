@@ -2,7 +2,7 @@ const { generateHash } = require("../../Client-server/utils/generateHash");
 
 const queryFuncs = require("../db/queryFunc");
 
-// let login_hash = "d2asf12dsf5sf5a5f5a$fsdgd5zggd42gfe5s5seg5$b4bFFBZDBSBFv16ZZDHb4zb4z6gdxh65tf465464ht5b4gf54x5x$g6z4g64s6g464r$z4hfdz464d646";
+
 function saltAndIt(login_hash) {
   //implementation
   return new Promise(async (resolve, reject) => {
@@ -10,9 +10,8 @@ function saltAndIt(login_hash) {
     const [client_it, client_salt] = await login_hash.split("$");
     const obj = {
         salt: `${client_salt}`,
-        no_of_it: `${client_it}`
+        iterations: `${client_it}`
     };
-  // console.log(obj);
       resolve(obj);
     } catch (error) {
       reject(error);
@@ -41,25 +40,18 @@ function hashAgain(data , salt ) {
       reject(error);
     }
   });
-
-// const data = {
-//     "username":"lakshA",
-//     "email": "lg123@gmail.com",
-//     "mobileNo": 12124234355555289,
-//     "login_hash": "b4bFFBZDBSBFv16ZZDHb4zb4z6gdxh65tf465464ht5b4gf54x5x$g6z4g64s6g464r$z4hfdz464d646"
-// }
+}
 
 
  function verifyPassword(obj) {
      return new Promise(async(resolve , reject)=>{
         try {
             const username = obj.username;
-            const hashBeforeHashing = obj.login_hash;
+            const hashBeforeHashing = obj.loginHash;
             const data = await queryFuncs.userDetailData(username);
             const storedHash = data[0].login_hash;
             const salt = await storedHash.split("$")[3];
-            const hashBuff = Buffer.from(hashBeforeHashing , 'hex');
-            const newHash = await hashAgain(hashBuff,salt);
+            const newHash = await hashAgain(hashBeforeHashing,salt);
             if (newHash === storedHash) {
               resolve(true);
             } else {
@@ -69,6 +61,6 @@ function hashAgain(data , salt ) {
             reject (error);
           }
      });
-}
+};
 
-module.exports = { saltAndIt, hashAgain, verifyPassword };
+module.exports = {saltAndIt, hashAgain, verifyPassword};

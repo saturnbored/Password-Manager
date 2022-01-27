@@ -5,10 +5,11 @@ const router = express.Router();
 
 //get req for sending salt and no of iteration.
 //Completed.
-router.get("/salt/:username", routeFuncs.genrateSaltAndIt );
+router.use(express.json());
+
+router.get("/salt/:username/", routeFuncs.genrateSaltAndIt );
 
 //So that express accept json in body
-router.use(express.json());
 
 // post req when user creates a new acc.
 //completed.
@@ -17,7 +18,7 @@ router.post("/create/account", routeFuncs.createAccount);
 // queryFuncs.createTable_user_profile()
 
 //get req to send whole login_details of user.
-router.get("/sendData/:username", routeFuncs.sendLoginData);
+router.get("/vault/:username", routeFuncs.sendLoginData);
 
 //post req when Existing User storing the password.
 router.post("/savepassword/:username", routeFuncs.saveUserData );
@@ -26,10 +27,10 @@ router.post("/savepassword/:username", routeFuncs.saveUserData );
 router.post("/login", routeFuncs.login );
 
 //route to update user vault.
-router.patch("data/:username/:id", routeFuncs.updateUserData );
+router.patch("/data/:username/:id", routeFuncs.updateUserData );
 
 //route to delete data from login_detail.
-router.delete("data/:username/:id" , routeFuncs.deleteData);
+router.delete("/data/:username/:id" , routeFuncs.deleteData);
 
 
 
