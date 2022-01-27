@@ -22,7 +22,6 @@ class USER{
             const hashBuffer = Buffer.from(hash.split('$')[2], 'hex');
             this.#key = await generateHash(hashBuffer, this.username, this.#keyIterations, this.#keyLen);
             this.#key = this.#key.split('$')[2];
-            console.log(this.#key);
         }
         catch(err){
             console.log(err);
@@ -87,7 +86,6 @@ class USER{
                 const decrypted = await decrypt(encrypted, that.#key);
                 resolve(decrypted);                
             } catch (err) {
-                console.log(err);
                 reject({
                     msg: "An error occurred in decrypt method",
                     err
@@ -96,15 +94,18 @@ class USER{
         })
     }
     
-    setVault(){
-        this.vault.forEach(async function(obj){
-            try{
-                obj.name = await this.getDecrypted(obj.name);
+    async setVault(){
+        const that = this;
+        try{
+            for(let i = 0; i < that.vault.length; i++){
+                const encryptedName = that.vault[i].name;
+                that.vault[i].name = await that.getDecrypted(encryptedName);
             }
-            catch(err){
-                console.log(err);
-            }
-        })
+        }
+        catch(err){
+            console.log("Error in SetVault");
+            console.log(err);
+        }
     }
 }
 

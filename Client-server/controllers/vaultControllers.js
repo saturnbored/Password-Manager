@@ -2,7 +2,7 @@
  * this file contains all the controllers for '../routes/vaultRouter.js'
  * 
 */
-const axios = require('axios').create({ baseUrl: "http://localhost:8080/" });
+const axios = require('axios');
 
 const {user} = require('../crypto/USER');
 /**
@@ -29,16 +29,15 @@ const addItem = async function(req, res){
 
     try {
         const encryptedDetails = req.body;
+        encryptedDetails.name = await user.getEncrypted(req.body.name);
         encryptedDetails.username = await user.getEncrypted(req.body.username);
         encryptedDetails.password = await user.getEncrypted(encryptedDetails.password);
         encryptedDetails.url = await user.getEncrypted(encryptedDetails.url);
         encryptedDetails.description = await user.getEncrypted(encryptedDetails.description);
-        const result = await axios.post('savepassword/', encryptedDetails, {
-            params: { username: user.username }
-        })
-        // const result = {success: true};
-        if(result.success){
-            user.vault.push(req.body);
+        const response = await axios.post(`http://localhost:8080/userdata/savepassword/${user.username}`, encryptedDetails);
+        if(response.data.success){
+            encryptedDetails.name = await user.getDecrypted(encryptedDetails.name);
+            user.vault.push(encryptedDetails);
             return res.status(201).json({ success: true, addedInfo: encryptedDetails });
         }
         else{
@@ -62,7 +61,6 @@ const getItem = async function(req, res){
         let [item] = user.vault.filter(function(obj){
             return obj.name === req.params.name;
         });
-        // console.log(item);
         if(!item){
             return res.status(404).json({ msg: "No resource found" });
         }
@@ -94,32 +92,26 @@ const updateItem = async function(req, res){
         let [item] = user.vault.filter(function(obj){
             return obj.name === req.params.name;
         });
-        // console.log(item);
         if(!item){
             return res.status(404).json({ msg: "No resource found" });
         }
         for(const field in item){
-            item[field] = await user.getDecrypted(item[field]);
+            const encryptedField = item[field];
+            item[field] = await user.getDecrypted(encryptedField);
         }
         for(const field in updatedItem){
             if(item[field] !== updatedItem[field]){
                 item[field] = updatedItem[field];
             }
         }
-        for(let obj in user.vault){
-            if(obj.name === req.params.name){
-                obj = item;
-                break;
-            }
+        for(const field in item){
+            if(field != 'id')
+                item[field] = await user.getEncrypted(item[field]);
         }
-        const result = await axios.patch('data/', item, {
-            params: {
-                username: user.username,
-                id: item.id
-            }
-        });
-        if(result.sucess){
-            return res.status(200).json({item});
+        const response = await axios.patch(`http://localhost:8080/userdata/data/${user.username}/${item.id}`, item);
+        if(response.data.success){
+            item.name = await user.getDecrypted(item.name);
+            return res.status(200).json(response.data);
         }
         else{
             throw new Error("Internal Server Error");
@@ -139,17 +131,11 @@ const deleteItem = async function(req, res){
         let [item] = user.vault.filter(function(obj){
             return obj.name === req.params.name;
         });
-        // console.log(item);
         if(!item){
             return res.status(404).json({ msg: "No resource found" });
         }
-        const result = await axios.delete('data/',{
-            params: {
-                username: user.username,
-                id: item.id
-            }
-        })
-        if(result.success){
+        const response = await axios.delete(`http://localhost:8080/userdata/data/${user.username}/${item.id}`);
+        if(response.data.success){
             user.vault.splice(user.vault.findIndex(obj => obj.id === item.id), 1);
             return res.status(200).json({success: true, msg: "Deleted successfully"})
         }
@@ -166,11 +152,11 @@ const deleteItem = async function(req, res){
 // GET the entire decrypted vault
 const getDecryptedVault = async function(req, res){
     try {
-        for(const obj in user.vault){
-            for(const field in obj){
-                obj[field] = await user.vault.getDecrypted(obj[field]);
+        for(let i = 0; i < user.vault.length; i++){
+            for(const field in user.vault[i]){
+                user.vault[i][field] = await user.getDecrypted(user.vault[i][field]);
             }
-        };
+        }
         return res.status(200).json({vault: user.vault});
 
     } catch (err) {
@@ -182,10 +168,8 @@ const getDecryptedVault = async function(req, res){
 // GET the entire encrypted vault 
 const getEncryptedVault = async function(req, res){
     try {
-        const encryptedVault = await axios.get('vault/', { 
-            params: {username: user.username}
-        })
-        return res.status(200).json(encryptedVault);
+        const response = await axios.get(`http://localhost:8080/userdata/vault/${user.username}`);
+        return res.status(200).json(response.data);
     } catch (err) {
         console.log(err);
         return res.status(500).json({err});

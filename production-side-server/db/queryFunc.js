@@ -59,18 +59,14 @@ async function createLoginDetailTable() {
     u_id INTEGER NOT NULL,\
         FOREIGN KEY (u_id) REFERENCES user_profile (u_id) \
     )`;
-try {
-  const data = await  runQuery(sqlQuery);
-  return true ;
+  try {
+    await runQuery(sqlQuery);
+    return true ;
 
-} catch (err) {
-  return err;
+  } catch (err) {
+    return err;
+  }
 }
-// console.log(data);
-}
-
-
-
 
 // insert data when new user creates account
 async function InsertIntoUserDetail(reqData) {
@@ -91,7 +87,7 @@ async function InsertIntoUserDetail(reqData) {
 //insert data of perticular user
 async function insertIntoLoginDetail(reqdata , userId){
   try {
-    const result = await runQuery( `INSERT INTO login_detail (name , username , password , url ,description , u_id) VALUES(?,?,?,?,?,?)`, [reqdata.name , reqdata.username, reqdata.password, reqdata.url, reqdata.description , userId]);
+    await runQuery( `INSERT INTO login_detail (name , username , password , url ,description , u_id) VALUES(?,?,?,?,?,?)`, [reqdata.name , reqdata.username, reqdata.password, reqdata.url, reqdata.description , userId]);
     return true;
   } catch (error) {
     return error;
@@ -118,12 +114,11 @@ async function userIdFromLoginDetail(uId) {
   }
 }
 
-
 async function userDetailData(uName) {
   try {
-    const data = await runQuery(`SELECT * FROM user_profile WHERE username = ?`,
-        uName);
-        return data;
+      const data = await runQuery(`SELECT * FROM user_profile WHERE username = ?`,
+          uName);
+      return data;
   } catch (error){
       return error;
   }
@@ -131,7 +126,6 @@ async function userDetailData(uName) {
 
 
 //update query.
-//completed.
 async function updateUserData(id , data){
   try {
     const col = Object.keys(data);
@@ -141,7 +135,7 @@ async function updateUserData(id , data){
       s += ` ${col[i]} = "${val[i]}",`;
     }
     let sqlQuery = s.substring(0, s.length-1) + ` WHERE id = ?`; 
-    const result = await runQuery(sqlQuery , id);
+    await runQuery(sqlQuery , id);
     return true;
   } catch (error) {
     return error;
@@ -149,19 +143,15 @@ async function updateUserData(id , data){
 }
 
 // delete rows from userDetail table.
-// How can we get name of table?
 async function deleteRowInLoginDetail(id){
   try {
     const sqlQuery = `DELETE FROM login_detail WHERE id=?`;
-    const result = await runQuery(sqlQuery,id);
+    await runQuery(sqlQuery,id);
     return true;
   } catch (error) {
     return error;
   }
 }
-
-// deleteRowInLoginDetail(9);
-
 
 async function deleteTable(t_name) {
   try {

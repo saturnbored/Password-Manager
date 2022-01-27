@@ -40,18 +40,6 @@ const verifyPassword = async function(password, cipherText){
     }
 }
 
-/* const sample = async function(){
-    try{
-        const hashed = await hashPassword('password');
-        const response = await verifyPassword('Password', hashed);
-        console.log(response);
-    }
-    catch(err){
-        console.log(err);
-    }
-}
-sample(); */
-
 module.exports = {
     hashPassword,
     verifyPassword
