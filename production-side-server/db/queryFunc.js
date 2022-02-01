@@ -44,6 +44,7 @@ async function createTable_user_profile() {
     return error;
   }
 }
+// createTable_user_profile();
 
 
 
@@ -67,6 +68,7 @@ async function createLoginDetailTable() {
     return err;
   }
 }
+// createLoginDetailTable();
 
 // insert data when new user creates account
 async function InsertIntoUserDetail(reqData) {

@@ -61,7 +61,10 @@ const loginUser = async function(req, res){
         const result = await axios.post('http://localhost:8080/userdata/login/', { 
             username: user.username,
             loginHash: passswordHash });
+
+        // const authToken = result.data.token; //it contains the jwtToken sent after user got loged in. 
         if(result.data.success){
+            console.log(result.data.token);
             const response = await axios.get(`http://localhost:8080/userdata/vault/${user.username}`);
             user.vault = response.data;
             await user.setVault();
