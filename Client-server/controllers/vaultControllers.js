@@ -4,6 +4,8 @@
 */
 const axios = require('axios');
 
+const { tokenInterceptorAxios } = require('../middleware/tokenInterceptorAxios');
+
 const {user} = require('../crypto/USER');
 /**
  * user object:
@@ -25,6 +27,9 @@ const {user} = require('../crypto/USER');
  *  addedInfo: <the info that was added to login_details table>
  * }
 */
+
+axios.interceptors.request.use(tokenInterceptorAxios);
+
 const addItem = async function(req, res){
 
     try {
