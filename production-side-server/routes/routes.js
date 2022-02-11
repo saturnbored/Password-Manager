@@ -18,19 +18,19 @@ router.post("/create/account", routeFuncs.createAccount);
 // queryFuncs.createTable_user_profile()
 
 //get req to send whole login_details of user.
-router.get("/vault/:username", routeFuncs.sendLoginData);
+router.get("/vault/:username",routeFuncs.verifyToken, routeFuncs.sendLoginData);
 
 //post req when Existing User storing the password.
-router.post("/savepassword/:username", routeFuncs.saveUserData );
+router.post("/savepassword/:username",routeFuncs.verifyToken, routeFuncs.saveUserData );
 
 //post req to validate user cendentials.
 router.post("/login", routeFuncs.login );
 
 //route to update user vault.
-router.patch("/data/:username/:id", routeFuncs.updateUserData );
+router.patch("/data/:username/:id",routeFuncs.verifyToken, routeFuncs.updateUserData );
 
 //route to delete data from login_detail.
-router.delete("/data/:username/:id" , routeFuncs.deleteData);
+router.delete("/data/:username/:id" ,routeFuncs.verifyToken, routeFuncs.deleteData);
 
 
 

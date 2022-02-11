@@ -25,7 +25,6 @@ app.listen(port, ()=>{
 
 
 
-
 // queryFuncs.deleteTable(t_name);
 
 

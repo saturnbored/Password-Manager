@@ -1,8 +1,9 @@
 const queryFuncs = require("../db/queryFunc");
 const systemFuncs = require("../modules/systemFuncs");
-const {
-  generateRandomBytes,
-} = require("../../Client-server/utils/randomBytes");
+const {generateRandomBytes} = require("../../Client-server/utils/randomBytes");
+const dotenv = require("dotenv").config();
+const jwt = require("jsonwebtoken");
+
 
 const genrateSaltAndIt = async function (req, res) {
 
@@ -88,9 +89,17 @@ async function login(req, res) {
     const obj = req.body;
     const result = await systemFuncs.verifyPassword(obj);
     if (result) {
+      //signing JWT-token.
+      const token = jwt.sign({
+        username : obj.username
+      } , process.env.secret_key ,{
+        expiresIn :"1h"
+      });
+      console.log(token);
       return res.status(200).json({
         success: true,
-        msg: "Login Successful"
+        msg: "Login Successful",
+        token
       });
     } else {
       return res.json({
@@ -102,6 +111,7 @@ async function login(req, res) {
     return res.json({ error });
   }
 }
+
 
 async function updateUserData(req, res) {
   try {
@@ -159,6 +169,26 @@ async function deleteData(req, res) {
   }
 }
 
+
+
+async function verifyToken(req, res , next){
+  const token = req.body.authToken;
+  // or
+  // const token = req.header("authToken");
+
+  if(!token) res.status(200).json({success : false , mssg : "Access denied."});
+  
+  try {
+    const isVerified = await jwt.verify(token , process.env.secret_key);
+    // if token is correct then "isVerified" contaions the payload passed while signing jwt.
+    
+    next();
+  } catch (error) {
+    console.log(error);
+  }
+
+}
+
 module.exports = {
   genrateSaltAndIt,
   createAccount,
@@ -167,4 +197,5 @@ module.exports = {
   login,
   updateUserData,
   deleteData,
+  verifyToken
 };

@@ -66,6 +66,7 @@ const loginUser = async function(req, res){
         response = await axios.post('http://localhost:8080/userdata/login/', { 
             username: user.username,
             loginHash: passswordHash });
+
         if(response.data.success){
             localStorage.setItem('accessToken', JSON.stringify(response.data.token));
             response = await axios.get(`http://localhost:8080/userdata/vault/${user.username}`);
