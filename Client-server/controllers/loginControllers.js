@@ -27,6 +27,7 @@ const { localStorage } = require('../storage/LocalStorage');
  * 
  * }
  */
+
 const addNewUser = async function(req, res){
     try{
         const newUser = new USER;
@@ -67,9 +68,11 @@ const loginUser = async function(req, res){
             username: user.username,
             loginHash: passswordHash });
 
+        console.log(response.data);
         if(response.data.success){
-            localStorage.setItem('accessToken', JSON.stringify(response.data.token));
+            localStorage.setItem('accessToken', response.data.token);
             response = await axios.get(`http://localhost:8080/userdata/vault/${user.username}`);
+            console.log(response.data);
             user.vault = response.data;
             await user.setVault();
             return res.status(200).json(user);
