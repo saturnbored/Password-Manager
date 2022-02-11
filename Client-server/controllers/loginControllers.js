@@ -13,6 +13,11 @@ const { user, USER } = require('../crypto/USER');
  * getDecrypted(encrypted: string/hex) // returns decrypted text
  */
 
+const { localStorage } = require('../storage/LocalStorage');
+/** 
+ * localStorage to be used just like localStorage feature of browsers
+ */
+
 /** 
  * req.body object: {
  *  username: string/utf-8,
@@ -54,15 +59,16 @@ const addNewUser = async function(req, res){
 const loginUser = async function(req, res){
     user.setDetails(req.body.username, req.body.password);
     try{
-        const response = await axios.get(`http://localhost:8080/userdata/salt/${user.username}`);
+        let response = await axios.get(`http://localhost:8080/userdata/salt/${user.username}`);
         const salt = response.data.salt;
         const iterations = parseInt(response.data.iterations, 10);
         const passswordHash = await user.getPassswordHash(salt, iterations);
-        const result = await axios.post('http://localhost:8080/userdata/login/', { 
+        response = await axios.post('http://localhost:8080/userdata/login/', { 
             username: user.username,
             loginHash: passswordHash });
-        if(result.data.success){
-            const response = await axios.get(`http://localhost:8080/userdata/vault/${user.username}`);
+        if(response.data.success){
+            localStorage.setItem('accessToken', JSON.stringify(response.data.token));
+            response = await axios.get(`http://localhost:8080/userdata/vault/${user.username}`);
             user.vault = response.data;
             await user.setVault();
             return res.status(200).json(user);
