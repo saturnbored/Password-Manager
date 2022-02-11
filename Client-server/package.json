@@ -16,6 +16,7 @@
   "dependencies": {
     "axios": "^0.24.0",
     "crypto": "^1.0.1",
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "node-localstorage": "^2.2.1"
   }
 }
