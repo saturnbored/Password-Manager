@@ -4,7 +4,7 @@
 */
 const axios = require('axios');
 
-const { tokenInterceptorAxios } = require('../middleware/tokenInterceptorAxios');
+const { addAuthorizationHeader } = require('../middleware/tokenInterceptorAxios');
 
 const {user} = require('../crypto/USER');
 /**
@@ -28,7 +28,7 @@ const {user} = require('../crypto/USER');
  * }
 */
 
-axios.interceptors.request.use(tokenInterceptorAxios);
+axios.interceptors.request.use(addAuthorizationHeader);
 
 const addItem = async function(req, res){
 
