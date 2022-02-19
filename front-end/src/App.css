@@ -1,3 +1,8 @@
+
+.vault-content{
+    width: 50%;
+    margin: auto;
+}
 .App {
   text-align: center;
 }
@@ -61,3 +66,4 @@
     transform: rotate(360deg);
   }
 }
+
