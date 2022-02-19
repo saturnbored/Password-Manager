@@ -1,0 +1,63 @@
+.App {
+  text-align: center;
+}
+
+
+
+/* Login form styling here */
+.login-page{
+  box-shadow: inset;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
+
+}
+
+.login{
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  /* margin: 2rem; */
+  padding: 2rem;
+  width: max-content;
+  /* width: 20px;
+  : auto; */
+}
+.loginDeatils{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.input{
+  margin: 15px;
+  padding: 5px;
+}
+#name{
+  color: rgb(240, 107, 66);
+}
+
+.btn{
+  color: blue;
+}
+
+
+
+
+
+
+
+
+
+
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
