@@ -56,6 +56,8 @@ async function sendLoginData(req, res) {
     const uName = req.params.username;
     const data = await queryFuncs.userDetailData(uName);
     const userId = data[0].u_id;
+
+
     const loginData = await queryFuncs.userLoginData(userId);
     return res.json(loginData);
   } catch (error) {
@@ -171,25 +173,21 @@ async function deleteData(req, res) {
 
 
 
-function verifyToken(req, res , next){
-  // const token = req.body.authToken;
-  // or
-  const token = req.header("authorization");
-  console.log("inside verifyToken");
-  console.log(token);
-  console.log("req.headers:");
-  console.log(req.headers);
-  if(!token) 
-    return res.status(200).json({success : false , msg : "Access denied."});
+async function verifyToken(req, res , next){
+  const token = req.header("authToken");
 
-  jwt.verify(token, process.env.secret_key, function(err, decoded){
-    if(err){
-      return res.status(400).json({success: false, err});
-    }
-    else 
-      req.username = decoded.username;
-  });
-  next();
+  if(!token) res.status(200).json({success : false , mssg : "Access denied."});
+  
+  try {
+    const isVerified = jwt.verify(token , process.env.secret_key);
+    // if token is correct then "isVerified" contaions the payload passed while signing jwt.
+    req.username = isVerified.username;
+
+    next();
+  } catch (error) {
+    console.log(error);
+  }
+
 }
 
 module.exports = {
